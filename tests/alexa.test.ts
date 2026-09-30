@@ -5,7 +5,6 @@ import {
   cancelarBloque, configurarDuracion, configurarEncadenado, consultarTiempo, decirDuracion, iniciarBloque,
   restablecerDuraciones, resumenDelDia, type Deps,
 } from '@/lib/alexa/servicio';
-import { NotionGateway, observadorNotion, sincronizarConNotion } from '@/lib/notion';
 import { AlexaTimerGateway, SinPermisoError, type EspecTimer, type TimerGateway } from '@/lib/alexa/timers';
 import { reconciliar } from '@/lib/ciclo';
 import { InMemorySessionRepository } from '@/lib/repositories/InMemorySessionRepository';
@@ -279,64 +278,6 @@ describe('formato de duración de la Timers API', () => {
     expect(await cuerpo(25)).toBe('PT25M');
     expect(await cuerpo(90)).toBe('PT1H30M');
     expect(await cuerpo(120)).toBe('PT2H');
-  });
-});
-
-describe('Notion', () => {
-  const foco = async (repo: InMemorySessionRepository) => repo.crearSesion({
-    ownerId: OWNER, tipo: 'FOCO', tarea: 'API', inicio: T0, finEsperado: new Date(T0.getTime() + min(25)),
-    fin: new Date(T0.getTime() + min(25)), estado: 'COMPLETADA', origen: 'VOZ',
-  });
-
-  it('crea la fila con las columnas esperadas y guarda el id de la página', async () => {
-    const repo = new InMemorySessionRepository();
-    const s = await foco(repo);
-    let enviado: { headers: Record<string, string>; body: { parent: unknown; properties: Record<string, unknown> } } | undefined;
-    const f = (async (_u: string, init: RequestInit) => {
-      enviado = { headers: init.headers as Record<string, string>, body: JSON.parse(init.body as string) };
-      return new Response('{"id":"pg1"}');
-    }) as unknown as typeof fetch;
-    await sincronizarConNotion(repo, new NotionGateway('tok', 'db1', f), s);
-    expect(enviado!.headers.Authorization).toBe('Bearer tok');
-    expect(enviado!.body.parent).toEqual({ database_id: 'db1' });
-    expect(enviado!.body.properties).toMatchObject({
-      Name: { title: [{ text: { content: 'API' } }] }, Estado: { select: { name: 'Completado' } }, Minutos: { number: 25 },
-    });
-    expect((await repo.obtenerSesion(OWNER, s._id))!.notionPageId).toBe('pg1');
-  });
-
-  it('no duplica, ignora descansos y no lanza si Notion falla', async () => {
-    const repo = new InMemorySessionRepository();
-    let llamadas = 0;
-    const falla = (async () => { llamadas++; return new Response('{}', { status: 500 }); }) as unknown as typeof fetch;
-    const notion = new NotionGateway('tok', 'db1', falla);
-    const s = await foco(repo);
-    await expect(sincronizarConNotion(repo, notion, s)).resolves.toBeUndefined();
-    expect((await repo.obtenerSesion(OWNER, s._id))!.notionPageId).toBeUndefined();
-    await sincronizarConNotion(repo, notion, { ...s, tipo: 'DESCANSO_CORTO' });
-    await sincronizarConNotion(repo, notion, { ...s, notionPageId: 'ya' });
-    expect(llamadas).toBe(1);
-  });
-
-  it('se dispara al reconciliar un foco vencido y al cancelar, y solo para focos', async () => {
-    const { repo, deps } = montar();
-    const vistos: string[] = [];
-    const alFinalizar = async (s: { tipo: string; estado: string }) => { vistos.push(`${s.tipo}:${s.estado}`); };
-    await iniciarBloque({ ...deps(), alFinalizar }, 'FOCO');
-    await reconciliar(repo, OWNER, new Date(T0.getTime() + min(26)), alFinalizar);
-    await iniciarBloque({ ...deps(new Date(T0.getTime() + min(30))), alFinalizar }, 'FOCO');
-    await cancelarBloque({ ...deps(new Date(T0.getTime() + min(32))), alFinalizar });
-    expect(vistos).toEqual(['FOCO:COMPLETADA', 'FOCO:INTERRUMPIDA']);
-  });
-
-  it('observadorNotion es opcional según las variables de entorno', () => {
-    const repo = new InMemorySessionRepository();
-    const antes = { ...process.env };
-    delete process.env.NOTION_TOKEN; delete process.env.NOTION_DATABASE_ID;
-    expect(observadorNotion(repo)).toBeUndefined();
-    process.env.NOTION_TOKEN = 't'; process.env.NOTION_DATABASE_ID = 'd';
-    expect(observadorNotion(repo)).toBeTypeOf('function');
-    process.env = antes;
   });
 });
 

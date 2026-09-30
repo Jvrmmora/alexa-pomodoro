@@ -3,7 +3,6 @@ import { AutoRefresco } from '@/components/AutoRefresco';
 import { Cuenta } from '@/components/Cuenta';
 import { GraficaSemanal } from '@/components/GraficaSemanal';
 import { haySesion } from '@/lib/autenticacion';
-import { observadorNotion } from '@/lib/notion';
 import { cargarPanel, type SesionVista } from '@/lib/panel';
 import { obtenerRepositorio } from '@/lib/repositorio';
 import { ZONA_HORARIA, type EstadoSesion, type TipoSesion } from '@/lib/tipos';
@@ -73,8 +72,7 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
   const { error } = await searchParams;
   const ownerId = process.env.ALEXA_OWNER_ID;
   if (!ownerId) throw new Error('Falta ALEXA_OWNER_ID');
-  const repo = await obtenerRepositorio();
-  const datos = await cargarPanel(repo, ownerId, new Date(), observadorNotion(repo));
+  const datos = await cargarPanel(await obtenerRepositorio(), ownerId, new Date());
   const { activa, hoy } = datos;
 
   return (

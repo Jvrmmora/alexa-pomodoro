@@ -19,20 +19,14 @@ export function tipoDescanso(focosEnCiclo: number): 'DESCANSO_CORTO' | 'DESCANSO
   return focosEnCiclo >= FOCOS_POR_CICLO ? 'DESCANSO_LARGO' : 'DESCANSO_CORTO';
 }
 
-/** Se llama con cada foco que termina (completado o interrumpido), p. ej. para sincronizar con Notion. */
-export type AlFinalizar = (sesion: Sesion) => Promise<void>;
-
 /**
  * Cierra las sesiones vencidas y actualiza el ciclo. Si el foco vencido tenía un descanso
  * programado, lo registra como sesión activa (con su inicio real) y sigue evaluando.
  * Devuelve la sesión activa vigente (o null).
  */
-export async function reconciliar(
-  repo: SessionRepository, ownerId: string, ahora: Date, alFinalizar?: AlFinalizar,
-): Promise<Sesion | null> {
+export async function reconciliar(repo: SessionRepository, ownerId: string, ahora: Date): Promise<Sesion | null> {
   let activa = await repo.obtenerSesionActiva(ownerId);
   while (activa && activa.finEsperado <= ahora) {
-    const cerrada: Sesion = { ...activa, estado: 'COMPLETADA', fin: activa.finEsperado };
     await repo.actualizarSesion(activa._id, { estado: 'COMPLETADA', fin: activa.finEsperado });
 
     const estado = await repo.obtenerEstado(ownerId);
@@ -50,7 +44,6 @@ export async function reconciliar(
       estado.sesionActivaId = siguiente._id;
     }
     await repo.guardarEstado(estado);
-    if (alFinalizar && cerrada.tipo === 'FOCO') await alFinalizar(cerrada);
     activa = siguiente;
   }
   return activa ?? null;

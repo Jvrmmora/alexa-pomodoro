@@ -1,6 +1,5 @@
 import * as Alexa from 'ask-sdk-core';
 import type { RequestEnvelope, ResponseEnvelope } from 'ask-sdk-model';
-import type { AlFinalizar } from '../ciclo';
 import type { SessionRepository } from '../repositories/SessionRepository';
 import type { TipoSesion } from '../tipos';
 import {
@@ -13,7 +12,6 @@ export interface ContextoSkill {
   repo: SessionRepository;
   ownerId: string;
   ahora?: () => Date;
-  alFinalizar?: AlFinalizar;
   /** Sustituible en pruebas; por defecto usa la Timers API con el token de la request. */
   timers?: (env: RequestEnvelope) => TimerGateway;
 }
@@ -39,7 +37,7 @@ function intent(nombre: string, ejecutar: (h: Alexa.HandlerInput, d: Deps) => Pr
     async handle(h) {
       try {
         const d: Deps = {
-          repo: ctx.repo, ownerId: ctx.ownerId, ahora: ctx.ahora?.() ?? new Date(), alFinalizar: ctx.alFinalizar,
+          repo: ctx.repo, ownerId: ctx.ownerId, ahora: ctx.ahora?.() ?? new Date(),
           timers: (ctx.timers ?? timersDesdeRequest)(h.requestEnvelope),
         };
         const voz = await ejecutar(h, d);

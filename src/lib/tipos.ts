@@ -14,8 +14,6 @@ export interface Sesion {
   origen: 'VOZ' | 'PANEL';
   /** Descanso ya programado (timer creado) que arranca al terminar este foco. */
   siguiente?: { tipo: TipoSesion; timerId: string; minutos: number };
-  /** Página de Notion creada para este foco (evita duplicados al sincronizar). */
-  notionPageId?: string;
 }
 
 export interface EstadoUsuario {

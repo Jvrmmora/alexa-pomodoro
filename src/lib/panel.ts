@@ -1,4 +1,4 @@
-import { duracionDe, reconciliar, type AlFinalizar } from './ciclo';
+import { duracionDe, reconciliar } from './ciclo';
 import type { SessionRepository } from './repositories/SessionRepository';
 import { rangoDia, rangoSemana } from './tiempo';
 import { ZONA_HORARIA, type EstadoSesion, type Sesion, type TipoSesion } from './tipos';
@@ -46,10 +46,8 @@ const etiquetaDia = (d: Date) =>
   new Intl.DateTimeFormat('es-CO', { timeZone: ZONA_HORARIA, weekday: 'short' }).format(d).replace('.', '');
 
 /** Todo lo que necesita el panel en una sola lectura. Reconcilia antes de leer. */
-export async function cargarPanel(
-  repo: SessionRepository, ownerId: string, ahora: Date, alFinalizar?: AlFinalizar,
-): Promise<DatosPanel> {
-  const activa = await reconciliar(repo, ownerId, ahora, alFinalizar);
+export async function cargarPanel(repo: SessionRepository, ownerId: string, ahora: Date): Promise<DatosPanel> {
+  const activa = await reconciliar(repo, ownerId, ahora);
   const estado = await repo.obtenerEstado(ownerId);
 
   const semana = rangoSemana(ahora);

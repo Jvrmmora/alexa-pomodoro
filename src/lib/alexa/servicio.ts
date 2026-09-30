@@ -1,4 +1,4 @@
-import { FOCOS_POR_CICLO, LIMITES_MIN, duracionDe, reconciliar, tipoDescanso, type AlFinalizar } from '../ciclo';
+import { FOCOS_POR_CICLO, LIMITES_MIN, duracionDe, reconciliar, tipoDescanso } from '../ciclo';
 import type { SessionRepository } from '../repositories/SessionRepository';
 import { rangoDia } from '../tiempo';
 import type { Sesion, TipoSesion } from '../tipos';
@@ -9,11 +9,10 @@ export interface Deps {
   timers: TimerGateway;
   ownerId: string;
   ahora: Date;
-  alFinalizar?: AlFinalizar;
 }
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
-const reconciliarDeps = (d: Deps) => reconciliar(d.repo, d.ownerId, d.ahora, d.alFinalizar);
+const reconciliarDeps = (d: Deps) => reconciliar(d.repo, d.ownerId, d.ahora);
 
 export function decirDuracion(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));
@@ -100,7 +99,6 @@ export async function cancelarBloque(d: Deps): Promise<string> {
   const estado = await d.repo.obtenerEstado(d.ownerId);
   estado.sesionActivaId = undefined;
   await d.repo.guardarEstado(estado);
-  if (d.alFinalizar) await d.alFinalizar({ ...activa, estado: 'INTERRUMPIDA', fin: d.ahora });
   return `Cancelé tu ${NOMBRE[activa.tipo]}.`;
 }
 
