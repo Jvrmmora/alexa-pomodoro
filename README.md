@@ -85,6 +85,8 @@ src/
     ├── tiempo.ts             # "hoy" y "semana" en Bogotá
     ├── ciclo.ts              # reglas de ciclo y reconciliación
     ├── mongo.ts              # cliente cacheado
+    ├── panel.ts              # datos del panel (hoy + semana)
+    ├── sesionPanel.ts        # cookie de sesión firmada (HMAC)
     ├── alexa/                # verificación de firma, Timers API, servicio y handlers
     └── repositories/
         ├── SessionRepository.ts
@@ -119,20 +121,22 @@ npm test                     # pruebas unitarias
 | `MONGODB_URI` | Cadena de conexión de MongoDB Atlas. |
 | `MONGODB_DB` | Nombre de la base (por defecto `pomodoro`). |
 | `ALEXA_OWNER_ID` | `userId` de Alexa del dueño. Se descubre en los logs en la primera prueba. |
+| `PANEL_PASSWORD` | Contraseña para entrar al panel web. |
+| `PANEL_SECRET` | Secreto aleatorio para firmar la cookie de sesión (`openssl rand -hex 32`). |
 
 > Los secretos viven solo en `.env.local` (ignorado por git) y en las variables de entorno de Vercel. **Nunca** se versionan.
 
 ## Hoja de ruta
 
 - [x] **Fase 0:** proyecto Next.js, dependencias y decisiones de diseño.
-- [x] **Fase 1 (MVP por voz):** código completo; falta desplegar y probar con un Echo real
+- [x] **Fase 1 (MVP por voz):** desplegado y probado en el simulador de Alexa
   - [x] Tipos, reglas de ciclo y reconciliación, tiempo en Bogotá (con pruebas)
   - [x] Repositorios en memoria y MongoDB
   - [x] Verificación de firma de Alexa
   - [x] Cliente de Timers API
   - [x] Endpoint `/api/alexa` y handlers
   - [x] Modelo de interacción `es-MX` y manifiesto del skill
-- [ ] **Fase 2:** panel de lectura (login, "Hoy", gráfica semanal, versión móvil).
+- [x] **Fase 2:** panel de lectura (login, "Hoy", historial, gráfica semanal, versión móvil, comandos de voz).
 - [ ] **Fase 3:** edición desde el panel, más pruebas, CI con GitHub Actions.
 - [ ] **Fase 4 (extras):** encadenado automático foco → descanso, duraciones configurables por voz, sincronización con Notion.
 

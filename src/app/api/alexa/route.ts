@@ -1,8 +1,7 @@
 import type { RequestEnvelope } from 'ask-sdk-model';
 import { procesar } from '@/lib/alexa/skill';
 import { verificarRequestAlexa } from '@/lib/alexa/verificar';
-import { obtenerDb } from '@/lib/mongo';
-import { MongoSessionRepository } from '@/lib/repositories/MongoSessionRepository';
+import { obtenerRepositorio } from '@/lib/repositorio';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,6 +31,6 @@ export async function POST(request: Request) {
   }
   if (userId !== owner) return respuestaVoz('Este skill es personal y no está disponible para tu cuenta.');
 
-  const repo = new MongoSessionRepository(await obtenerDb());
+  const repo = await obtenerRepositorio();
   return Response.json(await procesar({ repo, ownerId: owner }, env));
 }

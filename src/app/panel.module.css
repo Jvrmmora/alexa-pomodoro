@@ -1,0 +1,73 @@
+.pagina {
+  width: 100%; max-width: 720px; margin: 0 auto; padding: 16px 16px 40px;
+  display: grid; gap: 12px;
+}
+
+.cabecera { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+.cabecera h1 { font-size: 1.4rem; }
+.salir {
+  padding: 8px 14px; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--suave); border: 1px solid var(--borde);
+}
+
+.tarjeta {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 16px; padding: 16px;
+}
+.tarjeta h2 { font-size: 1rem; margin-bottom: 12px; }
+
+/* Bloque activo */
+.activa { text-align: center; padding: 22px 16px; }
+.tipo { color: var(--suave); font-size: 0.95rem; }
+.reloj {
+  font-size: clamp(3.5rem, 18vw, 5.5rem); font-weight: 700; line-height: 1.1; margin: 6px 0 10px;
+  font-variant-numeric: tabular-nums; color: var(--acento);
+}
+.barra { height: 8px; border-radius: 99px; background: var(--acento-suave); overflow: hidden; }
+.barra span { display: block; height: 100%; background: var(--acento); transition: width 1s linear; }
+.pie, .ciclo { color: var(--suave); font-size: 0.85rem; margin-top: 10px; }
+.vacio { color: var(--suave); font-size: 0.9rem; }
+
+/* Métricas */
+.metricas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.metricas .tarjeta { padding: 14px 8px; text-align: center; }
+.metricas b { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.metricas span { color: var(--suave); font-size: 0.78rem; }
+
+/* Gráfica semanal */
+.grafica { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 160px; }
+.columna { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.total { height: 1em; font-size: 0.75rem; color: var(--suave); font-variant-numeric: tabular-nums; }
+.pila {
+  flex: 1; width: 100%; max-width: 40px; display: flex; flex-direction: column; justify-content: flex-end;
+  border-radius: 6px; overflow: hidden; background: color-mix(in srgb, var(--borde) 45%, transparent);
+}
+.dia { font-size: 0.75rem; color: var(--suave); text-transform: capitalize; }
+.hoy .dia { color: var(--texto); font-weight: 700; }
+.completado { background: var(--ok); }
+.interrumpido { background: var(--pausa); }
+.pila span { display: block; width: 100%; }
+.leyenda { display: flex; gap: 16px; margin-top: 12px; font-size: 0.78rem; color: var(--suave); }
+.leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+
+/* Historial */
+.lista { list-style: none; display: grid; }
+.fila { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--borde); }
+.fila:first-child { border-top: 0; padding-top: 0; }
+.horaFila { color: var(--suave); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+.detalle { display: grid; min-width: 0; }
+.detalle strong { font-weight: 600; font-size: 0.95rem; }
+.tarea { color: var(--suave); font-size: 0.85rem; overflow-wrap: anywhere; }
+.etiqueta { font-size: 0.75rem; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.COMPLETADA { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.INTERRUMPIDA { background: color-mix(in srgb, var(--pausa) 25%, transparent); color: var(--suave); }
+.ACTIVA { background: var(--acento-suave); color: var(--acento); }
+
+/* Comandos */
+.comandos { display: grid; gap: 12px; margin-top: 12px; }
+.comandos dt { font-size: 0.8rem; color: var(--suave); }
+.comandos dd { font-size: 0.95rem; overflow-wrap: anywhere; }
+
+@media (min-width: 640px) {
+  .pagina { padding-top: 32px; gap: 16px; }
+  .tarjeta { padding: 20px; }
+}
