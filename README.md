@@ -69,6 +69,9 @@ Base `pomodoro`, dos colecciones:
 | `CancelarBloque` | Cancela el timer y marca la sesión como interrumpida. |
 | `ConsultarTiempo` | Dice cuánto falta. |
 | `Resumen` | Completados e interrumpidos de hoy. |
+| `ConfigurarDuracion` | *"configura el foco en 30 minutos"*. Tipos: foco, descanso corto, descanso largo. |
+| `RestablecerDuraciones` | Vuelve a 25 / 5 / 15. |
+| `ActivarEncadenado` / `DesactivarEncadenado` | Cada foco programa también el descanso que le sigue. |
 | Integrados | Help, Cancel, Stop, Fallback, NavigateHome. |
 
 ## Stack
@@ -96,6 +99,14 @@ src/
 skill-package/                # manifiesto y modelo de interacción es-MX
 tests/                        # Vitest
 ```
+
+## Extras (fase 4)
+
+**Descansos encadenados.** Alexa no deja que un skill lance el siguiente bloque por sí solo: al vencer, un timer solo puede anunciar un texto, sonar, o (`LAUNCH_TASK`) preguntar y esperar un "sí" del usuario, y eso exige estar en un programa de vista previa. Por eso, con el encadenado activo, un foco crea **dos timers** desde el inicio (foco y foco+descanso). Alexa avisa al terminar el foco ("Descansa 5 minutos") y otra vez al terminar el descanso. El descanso se registra en el historial la próxima vez que se consulta el estado, con su hora de inicio real (`reconciliar` cierra el foco y crea el descanso, y sigue evaluando). Cancelar cancela ambos timers. El tipo de descanso (corto/largo) se decide al iniciar el foco.
+
+**Duraciones por voz.** Se guardan en `estados.duraciones` y aplican desde el siguiente bloque. Límites: foco 5–120 min, descansos 1–60 (la Timers API admite hasta 2 h).
+
+**Notion (opcional).** Si defines `NOTION_TOKEN` y `NOTION_DATABASE_ID`, cada foco que termina (completado o interrumpido, por voz) crea una fila en tu base. Columnas requeridas: `Name` (título) · `Estado` (select: Completado / Interrumpido) · `Inicio` (fecha) · `Minutos` (número). La sincronización espera como máximo 3 s y nunca rompe la respuesta de voz si Notion falla; `notionPageId` evita duplicados. No se sincronizan las ediciones ni los bloques registrados a mano en el panel.
 
 ## Edición desde el panel
 
@@ -130,6 +141,8 @@ npm test                     # pruebas unitarias (también corren en CI)
 | `MONGODB_URI` | Cadena de conexión de MongoDB Atlas. |
 | `MONGODB_DB` | Nombre de la base (por defecto `pomodoro`). |
 | `ALEXA_OWNER_ID` | `userId` de Alexa del dueño. Se descubre en los logs en la primera prueba. |
+| `NOTION_TOKEN` | _(opcional)_ Token de una integración interna de Notion. |
+| `NOTION_DATABASE_ID` | _(opcional)_ Id de la base de Notion, compartida con esa integración. |
 | `PANEL_PASSWORD` | Contraseña para entrar al panel web. |
 | `PANEL_SECRET` | Secreto aleatorio para firmar la cookie de sesión (`openssl rand -hex 32`). |
 
@@ -147,7 +160,7 @@ npm test                     # pruebas unitarias (también corren en CI)
   - [x] Modelo de interacción `es-MX` y manifiesto del skill
 - [x] **Fase 2:** panel de lectura (login, "Hoy", historial, gráfica semanal, versión móvil, comandos de voz).
 - [x] **Fase 3:** edición desde el panel (tarea, estado, eliminar, registrar bloques), más pruebas y CI con GitHub Actions.
-- [ ] **Fase 4 (extras):** encadenado automático foco → descanso, duraciones configurables por voz, sincronización con Notion.
+- [x] **Fase 4 (extras):** descansos encadenados, duraciones configurables por voz y sincronización opcional con Notion.
 
 ## Conceptos de Alexa (glosario rápido)
 

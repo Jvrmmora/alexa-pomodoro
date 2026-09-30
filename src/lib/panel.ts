@@ -1,4 +1,4 @@
-import { DURACION_MIN, reconciliar } from './ciclo';
+import { duracionDe, reconciliar, type AlFinalizar } from './ciclo';
 import type { SessionRepository } from './repositories/SessionRepository';
 import { rangoDia, rangoSemana } from './tiempo';
 import { ZONA_HORARIA, type EstadoSesion, type Sesion, type TipoSesion } from './tipos';
@@ -24,6 +24,7 @@ export interface DatosPanel {
   ahora: string;
   activa: SesionVista | null;
   focosEnCiclo: number;
+  config: { foco: number; descansoCorto: number; descansoLargo: number; encadenar: boolean };
   hoy: { completados: number; interrumpidos: number; minutosEnfocados: number; sesiones: SesionVista[] };
   semana: DiaSemana[];
 }
@@ -38,15 +39,17 @@ const aVista = (s: Sesion): SesionVista => ({
   inicio: s.inicio.toISOString(),
   finEsperado: s.finEsperado.toISOString(),
   // Duración real si ya terminó; la planeada mientras está activa.
-  minutos: s.fin ? Math.max(0, Math.round((s.fin.getTime() - s.inicio.getTime()) / 60_000)) : DURACION_MIN[s.tipo],
+  minutos: Math.max(0, Math.round(((s.fin ?? s.finEsperado).getTime() - s.inicio.getTime()) / 60_000)),
 });
 
 const etiquetaDia = (d: Date) =>
   new Intl.DateTimeFormat('es-CO', { timeZone: ZONA_HORARIA, weekday: 'short' }).format(d).replace('.', '');
 
 /** Todo lo que necesita el panel en una sola lectura. Reconcilia antes de leer. */
-export async function cargarPanel(repo: SessionRepository, ownerId: string, ahora: Date): Promise<DatosPanel> {
-  const activa = await reconciliar(repo, ownerId, ahora);
+export async function cargarPanel(
+  repo: SessionRepository, ownerId: string, ahora: Date, alFinalizar?: AlFinalizar,
+): Promise<DatosPanel> {
+  const activa = await reconciliar(repo, ownerId, ahora, alFinalizar);
   const estado = await repo.obtenerEstado(ownerId);
 
   const semana = rangoSemana(ahora);
@@ -74,6 +77,10 @@ export async function cargarPanel(repo: SessionRepository, ownerId: string, ahor
     ahora: ahora.toISOString(),
     activa: activa ? aVista(activa) : null,
     focosEnCiclo: estado.focosEnCiclo,
+    config: {
+      foco: duracionDe(estado, 'FOCO'), descansoCorto: duracionDe(estado, 'DESCANSO_CORTO'),
+      descansoLargo: duracionDe(estado, 'DESCANSO_LARGO'), encadenar: estado.encadenar ?? false,
+    },
     hoy: {
       completados: focosHoy.filter((s) => s.estado === 'COMPLETADA').length,
       interrumpidos: focosHoy.filter((s) => s.estado === 'INTERRUMPIDA').length,

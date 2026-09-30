@@ -115,9 +115,108 @@
             "me diga cuántos pomodoros llevo",
             "dime el resumen de hoy"
           ]
+        },
+        {
+          "name": "ConfigurarDuracion",
+          "slots": [
+            {
+              "name": "tipo",
+              "type": "TIPO_BLOQUE"
+            },
+            {
+              "name": "minutos",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "configura el {tipo} en {minutos} minutos",
+            "configura el {tipo} a {minutos} minutos",
+            "cambia el {tipo} a {minutos} minutos",
+            "cambia el {tipo} en {minutos} minutos",
+            "pon el {tipo} en {minutos} minutos",
+            "que el {tipo} dure {minutos} minutos",
+            "configure el {tipo} en {minutos} minutos",
+            "cambie el {tipo} a {minutos} minutos",
+            "ponga el {tipo} en {minutos} minutos",
+            "el {tipo} de {minutos} minutos"
+          ]
+        },
+        {
+          "name": "RestablecerDuraciones",
+          "slots": [],
+          "samples": [
+            "restablece las duraciones",
+            "restablezca las duraciones",
+            "vuelve a las duraciones normales",
+            "duraciones por defecto",
+            "reinicia las duraciones"
+          ]
+        },
+        {
+          "name": "ActivarEncadenado",
+          "slots": [],
+          "samples": [
+            "activa el encadenado",
+            "active el encadenado",
+            "encadena los descansos",
+            "encadene los descansos",
+            "programa los descansos automáticamente",
+            "programe los descansos automáticamente"
+          ]
+        },
+        {
+          "name": "DesactivarEncadenado",
+          "slots": [],
+          "samples": [
+            "desactiva el encadenado",
+            "desactive el encadenado",
+            "deja de encadenar los descansos",
+            "no encadenes los descansos",
+            "no programes los descansos"
+          ]
         }
       ],
-      "types": []
+      "types": [
+        {
+          "name": "TIPO_BLOQUE",
+          "values": [
+            {
+              "id": "FOCO",
+              "name": {
+                "value": "foco",
+                "synonyms": [
+                  "pomodoro",
+                  "bloque de foco",
+                  "enfoque",
+                  "trabajo"
+                ]
+              }
+            },
+            {
+              "id": "DESCANSO_CORTO",
+              "name": {
+                "value": "descanso corto",
+                "synonyms": [
+                  "descanso",
+                  "descanso chico",
+                  "pausa corta",
+                  "pausa"
+                ]
+              }
+            },
+            {
+              "id": "DESCANSO_LARGO",
+              "name": {
+                "value": "descanso largo",
+                "synonyms": [
+                  "descanso grande",
+                  "pausa larga"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }

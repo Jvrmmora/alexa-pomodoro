@@ -1,18 +1,31 @@
 import * as Alexa from 'ask-sdk-core';
 import type { RequestEnvelope, ResponseEnvelope } from 'ask-sdk-model';
+import type { AlFinalizar } from '../ciclo';
 import type { SessionRepository } from '../repositories/SessionRepository';
-import { cancelarBloque, consultarTiempo, iniciarBloque, resumenDelDia, type Deps } from './servicio';
+import type { TipoSesion } from '../tipos';
+import {
+  cancelarBloque, configurarDuracion, configurarEncadenado, consultarTiempo, iniciarBloque,
+  restablecerDuraciones, resumenDelDia, type Deps,
+} from './servicio';
 import { AlexaTimerGateway, PERMISO_TIMERS, SinPermisoError, type TimerGateway } from './timers';
 
 export interface ContextoSkill {
   repo: SessionRepository;
   ownerId: string;
   ahora?: () => Date;
+  alFinalizar?: AlFinalizar;
   /** Sustituible en pruebas; por defecto usa la Timers API con el token de la request. */
   timers?: (env: RequestEnvelope) => TimerGateway;
 }
 
-const AYUDA = 'Puedes decir: empieza a enfocarme en una tarea, inicia un descanso, cuánto falta, cancela el bloque o dame el resumen de hoy.';
+const AYUDA = 'Puedes decir: empieza a enfocarme en una tarea, inicia un descanso, cuánto falta, cancela el bloque o dame el resumen de hoy. También puedes configurar las duraciones o activar el encadenado.';
+
+/** Id canónico del slot (resuelto por sinónimos), o el valor tal cual si no hay resolución. */
+function valorSlot(env: Parameters<typeof Alexa.getSlot>[0], nombre: string): string | undefined {
+  const slot = Alexa.getSlot(env, nombre);
+  const resuelto = slot?.resolutions?.resolutionsPerAuthority?.find((r) => r.status.code === 'ER_SUCCESS_MATCH')?.values[0]?.value.id;
+  return resuelto ?? slot?.value;
+}
 
 const timersDesdeRequest = (env: RequestEnvelope): TimerGateway => {
   const { apiEndpoint, apiAccessToken } = env.context.System;
@@ -26,7 +39,7 @@ function intent(nombre: string, ejecutar: (h: Alexa.HandlerInput, d: Deps) => Pr
     async handle(h) {
       try {
         const d: Deps = {
-          repo: ctx.repo, ownerId: ctx.ownerId, ahora: ctx.ahora?.() ?? new Date(),
+          repo: ctx.repo, ownerId: ctx.ownerId, ahora: ctx.ahora?.() ?? new Date(), alFinalizar: ctx.alFinalizar,
           timers: (ctx.timers ?? timersDesdeRequest)(h.requestEnvelope),
         };
         const voz = await ejecutar(h, d);
@@ -63,6 +76,15 @@ export function crearSkill(ctx: ContextoSkill) {
       intent('CancelarBloque', (_, d) => cancelarBloque(d), ctx),
       intent('ConsultarTiempo', (_, d) => consultarTiempo(d), ctx),
       intent('Resumen', (_, d) => resumenDelDia(d), ctx),
+      intent('ConfigurarDuracion', async (h, d) => {
+        const tipo = valorSlot(h.requestEnvelope, 'tipo') as TipoSesion | undefined;
+        const minutos = Number(valorSlot(h.requestEnvelope, 'minutos'));
+        if (!tipo || !Number.isFinite(minutos)) return 'No te entendí. Di por ejemplo: configura el foco en 30 minutos.';
+        return configurarDuracion(d, tipo, minutos);
+      }, ctx),
+      intent('RestablecerDuraciones', (_, d) => restablecerDuraciones(d), ctx),
+      intent('ActivarEncadenado', (_, d) => configurarEncadenado(d, true), ctx),
+      intent('DesactivarEncadenado', (_, d) => configurarEncadenado(d, false), ctx),
       porNombre(['AMAZON.HelpIntent'], AYUDA, false),
       porNombre(['AMAZON.CancelIntent', 'AMAZON.StopIntent'], 'Hasta luego.', true),
       porNombre(['AMAZON.NavigateHomeIntent'], AYUDA, false),

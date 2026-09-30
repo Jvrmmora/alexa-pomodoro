@@ -1,6 +1,7 @@
 import type { RequestEnvelope } from 'ask-sdk-model';
 import { procesar } from '@/lib/alexa/skill';
 import { verificarRequestAlexa } from '@/lib/alexa/verificar';
+import { observadorNotion } from '@/lib/notion';
 import { obtenerRepositorio } from '@/lib/repositorio';
 
 export const runtime = 'nodejs';
@@ -32,5 +33,5 @@ export async function POST(request: Request) {
   if (userId !== owner) return respuestaVoz('Este skill es personal y no está disponible para tu cuenta.');
 
   const repo = await obtenerRepositorio();
-  return Response.json(await procesar({ repo, ownerId: owner }, env));
+  return Response.json(await procesar({ repo, ownerId: owner, alFinalizar: observadorNotion(repo) }, env));
 }

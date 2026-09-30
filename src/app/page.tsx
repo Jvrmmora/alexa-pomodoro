@@ -3,6 +3,7 @@ import { AutoRefresco } from '@/components/AutoRefresco';
 import { Cuenta } from '@/components/Cuenta';
 import { GraficaSemanal } from '@/components/GraficaSemanal';
 import { haySesion } from '@/lib/autenticacion';
+import { observadorNotion } from '@/lib/notion';
 import { cargarPanel, type SesionVista } from '@/lib/panel';
 import { obtenerRepositorio } from '@/lib/repositorio';
 import { ZONA_HORARIA, type EstadoSesion, type TipoSesion } from '@/lib/tipos';
@@ -62,6 +63,8 @@ const COMANDOS: [string, string][] = [
   ['Ver cuánto falta', 'pregúntale a mi pomodoro cuánto falta'],
   ['Parar el bloque', 'dile a mi pomodoro que cancele el bloque'],
   ['Ver cómo voy hoy', 'pídele a mi pomodoro que me dé el resumen de hoy'],
+  ['Cambiar una duración', 'dile a mi pomodoro que configure el foco en 30 minutos'],
+  ['Programar el descanso con cada foco', 'dile a mi pomodoro que active el encadenado'],
 ];
 
 export default async function Panel({ searchParams }: PageProps<'/'>) {
@@ -70,7 +73,8 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
   const { error } = await searchParams;
   const ownerId = process.env.ALEXA_OWNER_ID;
   if (!ownerId) throw new Error('Falta ALEXA_OWNER_ID');
-  const datos = await cargarPanel(await obtenerRepositorio(), ownerId, new Date());
+  const repo = await obtenerRepositorio();
+  const datos = await cargarPanel(repo, ownerId, new Date(), observadorNotion(repo));
   const { activa, hoy } = datos;
 
   return (
@@ -97,6 +101,10 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
           </>
         )}
         <p className={estilos.ciclo}>Ciclo: {datos.focosEnCiclo} de 4 focos</p>
+        <p className={estilos.ciclo}>
+          {datos.config.foco} / {datos.config.descansoCorto} / {datos.config.descansoLargo} min
+          {datos.config.encadenar ? ' · descansos encadenados' : ''}
+        </p>
       </section>
 
       <section className={estilos.metricas} aria-label="Resumen del día">

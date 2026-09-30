@@ -1,4 +1,3 @@
-import { DURACION_MIN } from '../ciclo';
 import type { TipoSesion } from '../tipos';
 
 export const PERMISO_TIMERS = 'alexa::alerts:timers:skill:readwrite';
@@ -7,16 +6,26 @@ export class SinPermisoError extends Error {
   constructor() { super('El usuario no ha concedido el permiso de timers'); }
 }
 
+export interface EspecTimer {
+  tipo: TipoSesion;
+  tarea?: string;
+  /** Duración desde ahora, en minutos (la Timers API admite hasta 2 h). */
+  minutos: number;
+  /** Texto que Alexa dice al vencer. */
+  anuncio: string;
+}
+
 /** Abstracción de la Timers API de Alexa (se sustituye por un falso en pruebas). */
 export interface TimerGateway {
-  crear(tipo: TipoSesion, tarea?: string): Promise<string>;
+  crear(spec: EspecTimer): Promise<string>;
   cancelar(timerId: string): Promise<void>;
 }
 
 const ETIQUETA: Record<TipoSesion, string> = {
   FOCO: 'Foco', DESCANSO_CORTO: 'Descanso corto', DESCANSO_LARGO: 'Descanso largo',
 };
-const ANUNCIO: Record<TipoSesion, string> = {
+
+export const ANUNCIO_FIN: Record<TipoSesion, string> = {
   FOCO: 'Terminó tu bloque de foco. Toma un descanso.',
   DESCANSO_CORTO: 'Terminó el descanso. Es hora de volver al foco.',
   DESCANSO_LARGO: 'Terminó el descanso largo. Es hora de volver al foco.',
@@ -34,16 +43,17 @@ export class AlexaTimerGateway implements TimerGateway {
     return { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' };
   }
 
-  async crear(tipo: TipoSesion, tarea?: string): Promise<string> {
+  async crear({ tipo, tarea, minutos, anuncio }: EspecTimer): Promise<string> {
+    const horas = Math.floor(minutos / 60);
     const res = await this.fetchFn(this.url, {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify({
-        duration: `PT${DURACION_MIN[tipo]}M`,
+        duration: `PT${horas ? `${horas}H` : ''}${minutos % 60 ? `${minutos % 60}M` : ''}`,
         timerLabel: tarea ? `${ETIQUETA[tipo]}: ${tarea}` : ETIQUETA[tipo],
         creationBehavior: { displayExperience: { visibility: 'VISIBLE' } },
         triggeringBehavior: {
-          operation: { type: 'ANNOUNCE', textToAnnounce: [{ locale: 'es-MX', text: ANUNCIO[tipo] }] },
+          operation: { type: 'ANNOUNCE', textToAnnounce: [{ locale: 'es-MX', text: anuncio }] },
           notificationConfig: { playAudible: true },
         },
       }),

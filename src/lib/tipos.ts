@@ -12,6 +12,10 @@ export interface Sesion {
   estado: EstadoSesion;
   timerId?: string;
   origen: 'VOZ' | 'PANEL';
+  /** Descanso ya programado (timer creado) que arranca al terminar este foco. */
+  siguiente?: { tipo: TipoSesion; timerId: string; minutos: number };
+  /** Página de Notion creada para este foco (evita duplicados al sincronizar). */
+  notionPageId?: string;
 }
 
 export interface EstadoUsuario {
@@ -19,6 +23,10 @@ export interface EstadoUsuario {
   sesionActivaId?: string;
   focosEnCiclo: number;
   zonaHoraria: string;
+  /** Duraciones personalizadas en minutos; lo que falte usa el valor por defecto. */
+  duraciones?: Partial<Record<TipoSesion, number>>;
+  /** Si está activo, cada foco programa también el descanso que le sigue. */
+  encadenar?: boolean;
 }
 
 export const ZONA_HORARIA = 'America/Bogota';
