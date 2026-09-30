@@ -85,12 +85,21 @@ src/
     ├── tiempo.ts             # "hoy" y "semana" en Bogotá
     ├── ciclo.ts              # reglas de ciclo y reconciliación
     ├── mongo.ts              # cliente cacheado
+    ├── alexa/                # verificación de firma, Timers API, servicio y handlers
     └── repositories/
         ├── SessionRepository.ts
         ├── MongoSessionRepository.ts
         └── InMemorySessionRepository.ts
+skill-package/                # manifiesto y modelo de interacción es-MX
 tests/                        # Vitest
 ```
+
+## Desplegar el skill
+
+1. Despliega en Vercel con `MONGODB_URI`, `MONGODB_DB` y `ALEXA_OWNER_ID` (vacío la primera vez).
+2. En la [consola de Alexa](https://developer.amazon.com/alexa/console/ask) crea un skill personalizado (es-MX, endpoint HTTPS propio) y carga `skill-package/` (o pega `es-MX.json` y define la URL de `/api/alexa`).
+3. Habilita el permiso de timers y dile algo al skill desde el simulador: el `userId` aparece en los logs de Vercel. Guárdalo en `ALEXA_OWNER_ID` y redespliega.
+4. Acepta el permiso de timers en la app de Alexa cuando el skill lo pida.
 
 ## Empezar en local
 
@@ -116,13 +125,13 @@ npm test                     # pruebas unitarias
 ## Hoja de ruta
 
 - [x] **Fase 0:** proyecto Next.js, dependencias y decisiones de diseño.
-- [ ] **Fase 1 (MVP por voz):** _en curso_
+- [x] **Fase 1 (MVP por voz):** código completo; falta desplegar y probar con un Echo real
   - [x] Tipos, reglas de ciclo y reconciliación, tiempo en Bogotá (con pruebas)
   - [x] Repositorios en memoria y MongoDB
-  - [ ] Verificación de firma de Alexa
-  - [ ] Cliente de Timers API
-  - [ ] Endpoint `/api/alexa` y handlers
-  - [ ] Modelo de interacción `es-MX` y manifiesto del skill
+  - [x] Verificación de firma de Alexa
+  - [x] Cliente de Timers API
+  - [x] Endpoint `/api/alexa` y handlers
+  - [x] Modelo de interacción `es-MX` y manifiesto del skill
 - [ ] **Fase 2:** panel de lectura (login, "Hoy", gráfica semanal, versión móvil).
 - [ ] **Fase 3:** edición desde el panel, más pruebas, CI con GitHub Actions.
 - [ ] **Fase 4 (extras):** encadenado automático foco → descanso, duraciones configurables por voz, sincronización con Notion.

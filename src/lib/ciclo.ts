@@ -17,6 +17,7 @@ export async function reconciliar(repo: SessionRepository, ownerId: string, ahor
   const estado = await repo.obtenerEstado(ownerId);
   estado.sesionActivaId = undefined;
   if (activa.tipo === 'FOCO') estado.focosEnCiclo = Math.min(estado.focosEnCiclo + 1, FOCOS_POR_CICLO);
+  if (activa.tipo === 'DESCANSO_LARGO') estado.focosEnCiclo = 0;
   await repo.guardarEstado(estado);
   return null;
 }

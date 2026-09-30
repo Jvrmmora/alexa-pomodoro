@@ -1,0 +1,33 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "es-MX": {
+          "name": "Mi Pomodoro",
+          "summary": "Técnica Pomodoro controlada por voz.",
+          "description": "Inicia bloques de foco y descansos con timers nativos de Alexa y consulta tu progreso del día.",
+          "examplePhrases": [
+            "Alexa, abre mi pomodoro",
+            "Alexa, dile a mi pomodoro que empiece a enfocarme en la API",
+            "Alexa, pregúntale a mi pomodoro cuánto falta"
+          ],
+          "keywords": ["pomodoro", "productividad", "foco"]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Skill personal en modo desarrollo.",
+      "category": "PRODUCTIVITY",
+      "distributionCountries": []
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "https://REEMPLAZA-CON-TU-DOMINIO.vercel.app/api/alexa",
+          "sslCertificateType": "Wildcard"
+        }
+      }
+    },
+    "permissions": [{ "name": "alexa::alerts:timers:skill:readwrite" }],
+    "manifestVersion": "1.0"
+  }
+}

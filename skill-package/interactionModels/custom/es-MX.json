@@ -1,0 +1,75 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "mi pomodoro",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "IniciarFoco",
+          "slots": [{ "name": "tarea", "type": "AMAZON.SearchQuery" }],
+          "samples": [
+            "empieza a enfocarme",
+            "empieza a enfocarme en {tarea}",
+            "inicia un foco",
+            "inicia un foco para {tarea}",
+            "iniciar foco",
+            "comienza un pomodoro",
+            "comienza un pomodoro de {tarea}",
+            "enfocarme en {tarea}",
+            "quiero concentrarme en {tarea}"
+          ]
+        },
+        {
+          "name": "IniciarDescanso",
+          "slots": [],
+          "samples": [
+            "inicia un descanso",
+            "iniciar descanso",
+            "empieza el descanso",
+            "quiero descansar",
+            "tomar un descanso",
+            "descanso"
+          ]
+        },
+        {
+          "name": "CancelarBloque",
+          "slots": [],
+          "samples": [
+            "cancela el bloque",
+            "cancelar bloque",
+            "cancela el pomodoro",
+            "detén el bloque",
+            "termina el bloque"
+          ]
+        },
+        {
+          "name": "ConsultarTiempo",
+          "slots": [],
+          "samples": [
+            "cuánto falta",
+            "cuánto tiempo queda",
+            "cuánto me queda",
+            "qué tiempo falta",
+            "cuántos minutos faltan"
+          ]
+        },
+        {
+          "name": "Resumen",
+          "slots": [],
+          "samples": [
+            "dame el resumen",
+            "dame el resumen de hoy",
+            "resumen del día",
+            "cuántos pomodoros llevo",
+            "cómo voy hoy"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
