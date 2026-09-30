@@ -3,14 +3,34 @@
     "languageModel": {
       "invocationName": "mi pomodoro",
       "intents": [
-        { "name": "AMAZON.CancelIntent", "samples": [] },
-        { "name": "AMAZON.HelpIntent", "samples": [] },
-        { "name": "AMAZON.StopIntent", "samples": [] },
-        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
-        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
         {
           "name": "IniciarFoco",
-          "slots": [{ "name": "tarea", "type": "AMAZON.SearchQuery" }],
+          "slots": [
+            {
+              "name": "tarea",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
           "samples": [
             "empieza a enfocarme",
             "empieza a enfocarme en {tarea}",
@@ -20,7 +40,15 @@
             "comienza un pomodoro",
             "comienza un pomodoro de {tarea}",
             "enfocarme en {tarea}",
-            "quiero concentrarme en {tarea}"
+            "quiero concentrarme en {tarea}",
+            "empiece a enfocarme",
+            "empiece a enfocarme en {tarea}",
+            "inicie un foco",
+            "inicie un foco para {tarea}",
+            "comience un pomodoro",
+            "comience un pomodoro de {tarea}",
+            "empieza a concentrarme en {tarea}",
+            "me enfoque en {tarea}"
           ]
         },
         {
@@ -32,7 +60,13 @@
             "empieza el descanso",
             "quiero descansar",
             "tomar un descanso",
-            "descanso"
+            "descanso",
+            "inicie un descanso",
+            "inicie el descanso",
+            "empiece el descanso",
+            "comience un descanso",
+            "empieza un descanso",
+            "me deje descansar"
           ]
         },
         {
@@ -43,7 +77,14 @@
             "cancelar bloque",
             "cancela el pomodoro",
             "detén el bloque",
-            "termina el bloque"
+            "termina el bloque",
+            "cancele el bloque",
+            "cancele el pomodoro",
+            "detenga el bloque",
+            "termine el bloque",
+            "cancela el foco",
+            "cancela el descanso",
+            "cancele el foco"
           ]
         },
         {
@@ -54,7 +95,10 @@
             "cuánto tiempo queda",
             "cuánto me queda",
             "qué tiempo falta",
-            "cuántos minutos faltan"
+            "cuántos minutos faltan",
+            "cuánto falta para terminar",
+            "cuántos minutos me quedan",
+            "cuánto tiempo me falta"
           ]
         },
         {
@@ -65,7 +109,11 @@
             "dame el resumen de hoy",
             "resumen del día",
             "cuántos pomodoros llevo",
-            "cómo voy hoy"
+            "cómo voy hoy",
+            "me dé el resumen",
+            "me dé el resumen de hoy",
+            "me diga cuántos pomodoros llevo",
+            "dime el resumen de hoy"
           ]
         }
       ],
