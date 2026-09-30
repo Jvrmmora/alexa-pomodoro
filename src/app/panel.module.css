@@ -62,10 +62,6 @@
 .INTERRUMPIDA { background: color-mix(in srgb, var(--pausa) 25%, transparent); color: var(--suave); }
 .ACTIVA { background: var(--acento-suave); color: var(--acento); }
 
-/* Comandos */
-.comandos { display: grid; gap: 12px; margin-top: 12px; }
-.comandos dt { font-size: 0.8rem; color: var(--suave); }
-.comandos dd { font-size: 0.95rem; overflow-wrap: anywhere; }
 
 @media (min-width: 640px) {
   .pagina { padding-top: 32px; gap: 16px; }
@@ -92,3 +88,25 @@
   background: var(--acento); color: #fff;
 }
 .botones .peligro { background: transparent; color: var(--error); border: 1px solid var(--borde); }
+
+/* Guía de rutina */
+.guia { list-style: none; display: grid; gap: 14px; margin-top: 14px; }
+.fase { border: 1px solid var(--borde); border-radius: 14px; padding: 14px; background: var(--fondo); }
+.fase header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 10px; }
+.fase h3 { font-size: 0.95rem; }
+.fase header span { font-size: 0.75rem; color: var(--suave); }
+.fase ul { list-style: none; display: grid; gap: 14px; }
+.paso { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
+.numero {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.8rem; font-weight: 700; background: var(--acento-suave); color: var(--acento);
+}
+.paso strong { display: block; font-size: 0.95rem; }
+.frase {
+  display: block; margin-top: 6px; padding: 8px 10px; border-radius: 10px; quotes: none;
+  font-size: 0.88rem; overflow-wrap: anywhere;
+  background: var(--superficie); border: 1px dashed var(--borde);
+}
+.frase::before { content: '“Alexa, '; color: var(--suave); }
+.frase::after { content: '”'; color: var(--suave); }
+.paso small { display: block; margin-top: 6px; font-size: 0.8rem; color: var(--suave); }

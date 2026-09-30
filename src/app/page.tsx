@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { AutoRefresco } from '@/components/AutoRefresco';
 import { Cuenta } from '@/components/Cuenta';
 import { GraficaSemanal } from '@/components/GraficaSemanal';
+import { GuiaRutina } from '@/components/GuiaRutina';
 import { haySesion } from '@/lib/autenticacion';
 import { cargarPanel, type SesionVista } from '@/lib/panel';
 import { obtenerRepositorio } from '@/lib/repositorio';
@@ -55,16 +56,6 @@ function Fila({ s }: { s: SesionVista }) {
     </li>
   );
 }
-
-const COMANDOS: [string, string][] = [
-  ['Empezar a trabajar', 'dile a mi pomodoro que empiece a enfocarme en [tarea]'],
-  ['Descansar', 'dile a mi pomodoro que inicie un descanso'],
-  ['Ver cuánto falta', 'pregúntale a mi pomodoro cuánto falta'],
-  ['Parar el bloque', 'dile a mi pomodoro que cancele el bloque'],
-  ['Ver cómo voy hoy', 'pídele a mi pomodoro que me dé el resumen de hoy'],
-  ['Cambiar una duración', 'dile a mi pomodoro que configure el foco en 30 minutos'],
-  ['Programar el descanso con cada foco', 'dile a mi pomodoro que active el encadenado'],
-];
 
 export default async function Panel({ searchParams }: PageProps<'/'>) {
   if (!(await haySesion())) redirect('/login');
@@ -144,13 +135,7 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
         </details>
       </section>
 
-      <section className={estilos.tarjeta}>
-        <h2>Comandos de voz</h2>
-        <p className={estilos.vacio}>Empieza con «Alexa,» y dilo en una sola frase.</p>
-        <dl className={estilos.comandos}>
-          {COMANDOS.map(([para, frase]) => (<div key={para}><dt>{para}</dt><dd>{frase}</dd></div>))}
-        </dl>
-      </section>
+      <GuiaRutina encadenar={datos.config.encadenar} />
     </main>
   );
 }
