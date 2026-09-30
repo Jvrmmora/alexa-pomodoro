@@ -25,6 +25,15 @@ export class InMemorySessionRepository implements SessionRepository {
     if (s) Object.assign(s, cambios);
   }
 
+  async obtenerSesion(ownerId: string, id: string): Promise<Sesion | null> {
+    const s = this.sesiones.find((x) => x._id === id && x.ownerId === ownerId);
+    return s ? { ...s } : null;
+  }
+
+  async eliminarSesion(ownerId: string, id: string): Promise<void> {
+    this.sesiones = this.sesiones.filter((x) => !(x._id === id && x.ownerId === ownerId));
+  }
+
   async obtenerSesionActiva(ownerId: string): Promise<Sesion | null> {
     const estado = await this.obtenerEstado(ownerId);
     const s = this.sesiones.find((x) => x._id === estado.sesionActivaId && x.estado === 'ACTIVA');

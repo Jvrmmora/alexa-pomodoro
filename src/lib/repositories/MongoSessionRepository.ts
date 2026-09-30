@@ -1,4 +1,4 @@
-import { ObjectId, type Db, type WithId } from 'mongodb';
+import { ObjectId, type Db, type UpdateFilter, type WithId } from 'mongodb';
 import { ZONA_HORARIA, type EstadoSesion, type EstadoUsuario, type Sesion } from '../tipos';
 import type { SessionRepository } from './SessionRepository';
 
@@ -34,7 +34,24 @@ export class MongoSessionRepository implements SessionRepository {
   async actualizarSesion(id: string, cambios: Partial<Sesion>): Promise<void> {
     const { _id, ...resto } = cambios;
     void _id;
-    await this.sesiones.updateOne({ _id: new ObjectId(id) }, { $set: resto });
+    // Un campo `undefined` significa "borrar el campo" (p. ej. quitar la tarea).
+    const set = Object.fromEntries(Object.entries(resto).filter(([, v]) => v !== undefined));
+    const unset = Object.fromEntries(Object.entries(resto).filter(([, v]) => v === undefined).map(([k]) => [k, '' as const]));
+    const update: UpdateFilter<SesionDoc> = {};
+    if (Object.keys(set).length) update.$set = set;
+    if (Object.keys(unset).length) update.$unset = unset;
+    await this.sesiones.updateOne({ _id: new ObjectId(id) }, update);
+  }
+
+  async obtenerSesion(ownerId: string, id: string): Promise<Sesion | null> {
+    if (!ObjectId.isValid(id)) return null;
+    const d = await this.sesiones.findOne({ _id: new ObjectId(id), ownerId });
+    return d ? aSesion(d) : null;
+  }
+
+  async eliminarSesion(ownerId: string, id: string): Promise<void> {
+    if (!ObjectId.isValid(id)) return;
+    await this.sesiones.deleteOne({ _id: new ObjectId(id), ownerId });
   }
 
   async obtenerSesionActiva(ownerId: string): Promise<Sesion | null> {

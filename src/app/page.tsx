@@ -6,7 +6,7 @@ import { haySesion } from '@/lib/autenticacion';
 import { cargarPanel, type SesionVista } from '@/lib/panel';
 import { obtenerRepositorio } from '@/lib/repositorio';
 import { ZONA_HORARIA, type EstadoSesion, type TipoSesion } from '@/lib/tipos';
-import { cerrarSesion } from './acciones';
+import { cerrarSesion, editarBloque, eliminarBloque, registrarBloque } from './acciones';
 import estilos from './panel.module.css';
 
 export const metadata = { title: 'Hoy · Pomodoro' };
@@ -31,6 +31,27 @@ function Fila({ s }: { s: SesionVista }) {
         {s.tarea && <span className={estilos.tarea}>{s.tarea}</span>}
       </span>
       <span className={`${estilos.etiqueta} ${estilos[s.estado]}`}>{ESTADO[s.estado]}</span>
+      {s.estado !== 'ACTIVA' && (
+        <details className={estilos.editar}>
+          <summary>Editar</summary>
+          <form action={editarBloque} className={estilos.formulario}>
+            <input type="hidden" name="id" value={s.id} />
+            {s.tipo === 'FOCO' && (
+              <label>Tarea<input name="tarea" defaultValue={s.tarea ?? ''} maxLength={80} /></label>
+            )}
+            <label>Estado
+              <select name="estado" defaultValue={s.estado}>
+                <option value="COMPLETADA">Completado</option>
+                <option value="INTERRUMPIDA">Interrumpido</option>
+              </select>
+            </label>
+            <div className={estilos.botones}>
+              <button type="submit">Guardar</button>
+              <button type="submit" formAction={eliminarBloque} className={estilos.peligro}>Eliminar</button>
+            </div>
+          </form>
+        </details>
+      )}
     </li>
   );
 }
@@ -43,9 +64,10 @@ const COMANDOS: [string, string][] = [
   ['Ver cómo voy hoy', 'pídele a mi pomodoro que me dé el resumen de hoy'],
 ];
 
-export default async function Panel() {
+export default async function Panel({ searchParams }: PageProps<'/'>) {
   if (!(await haySesion())) redirect('/login');
 
+  const { error } = await searchParams;
   const ownerId = process.env.ALEXA_OWNER_ID;
   if (!ownerId) throw new Error('Falta ALEXA_OWNER_ID');
   const datos = await cargarPanel(await obtenerRepositorio(), ownerId, new Date());
@@ -58,6 +80,8 @@ export default async function Panel() {
         <h1>🍅 Hoy</h1>
         <form action={cerrarSesion}><button className={estilos.salir}>Salir</button></form>
       </header>
+
+      {typeof error === 'string' && <p role="alert" className={estilos.aviso}>{error}</p>}
 
       <section className={`${estilos.tarjeta} ${estilos.activa}`} aria-label="Bloque activo">
         {activa ? (
@@ -93,6 +117,25 @@ export default async function Panel() {
         ) : (
           <ul className={estilos.lista}>{hoy.sesiones.map((s) => <Fila key={s.id} s={s} />)}</ul>
         )}
+      </section>
+
+      <section className={estilos.tarjeta}>
+        <details className={estilos.editar}>
+          <summary>Registrar un bloque que ya hiciste</summary>
+          <form action={registrarBloque} className={estilos.formulario}>
+            <label>Tipo
+              <select name="tipo" defaultValue="FOCO">
+                <option value="FOCO">Foco</option>
+                <option value="DESCANSO_CORTO">Descanso corto</option>
+                <option value="DESCANSO_LARGO">Descanso largo</option>
+              </select>
+            </label>
+            <label>Tarea (solo focos)<input name="tarea" maxLength={80} /></label>
+            <label>Hora de inicio (hoy)<input name="hora" type="time" required /></label>
+            <label>Duración (min)<input name="minutos" type="number" min={1} max={180} defaultValue={25} required /></label>
+            <div className={estilos.botones}><button type="submit">Registrar</button></div>
+          </form>
+        </details>
       </section>
 
       <section className={estilos.tarjeta}>

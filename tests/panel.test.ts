@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { borrarSesion, crearSesionManual, editarSesion } from '@/lib/edicion';
 import { cargarPanel } from '@/lib/panel';
 import { InMemorySessionRepository } from '@/lib/repositories/InMemorySessionRepository';
 import { COOKIE_SESION, crearToken, passwordCorrecta, tokenValido } from '@/lib/sesionPanel';
@@ -89,5 +90,59 @@ describe('sesión del panel', () => {
     expect(passwordCorrecta('abd', 'abc')).toBe(false);
     expect(passwordCorrecta('abc', undefined)).toBe(false);
     expect(COOKIE_SESION).toBeTruthy();
+  });
+});
+
+describe('edición desde el panel', () => {
+  const ahora = new Date('2026-01-07T20:00:00Z');
+
+  it('edita tarea y estado de un bloque terminado', async () => {
+    const repo = new InMemorySessionRepository();
+    await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'FOCO', 'INTERRUMPIDA');
+    await editarSesion(repo, OWNER, '1', { tarea: '  informe   final ', estado: 'COMPLETADA' });
+    expect(await repo.obtenerSesion(OWNER, '1')).toMatchObject({ tarea: 'informe final', estado: 'COMPLETADA' });
+    await editarSesion(repo, OWNER, '1', { tarea: '   ' });
+    expect((await repo.obtenerSesion(OWNER, '1'))!.tarea).toBeUndefined();
+  });
+
+  it('rechaza editar un bloque activo, ajeno, inexistente o con datos inválidos', async () => {
+    const repo = new InMemorySessionRepository();
+    await repo.crearSesion({ ownerId: OWNER, tipo: 'FOCO', inicio: ahora, finEsperado: ahora, estado: 'ACTIVA', origen: 'VOZ' });
+    await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'DESCANSO_CORTO', 'COMPLETADA', 5);
+    await expect(editarSesion(repo, OWNER, '1', { tarea: 'x' })).rejects.toThrow('por voz');
+    await expect(borrarSesion(repo, OWNER, '1')).rejects.toThrow('por voz');
+    await expect(editarSesion(repo, 'otro', '2', { tarea: 'x' })).rejects.toThrow('no existe');
+    await expect(editarSesion(repo, OWNER, '99', { tarea: 'x' })).rejects.toThrow('no existe');
+    await expect(editarSesion(repo, OWNER, '2', { tarea: 'x' })).rejects.toThrow('Solo los focos');
+    await expect(editarSesion(repo, OWNER, '2', { estado: 'ACTIVA' })).rejects.toThrow('Estado');
+    await sesion(repo, new Date('2026-01-07T14:00:00Z'), 'FOCO', 'COMPLETADA');
+    await expect(editarSesion(repo, OWNER, '3', { tarea: 'x'.repeat(81) })).rejects.toThrow('80');
+  });
+
+  it('elimina solo bloques propios', async () => {
+    const repo = new InMemorySessionRepository();
+    await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'FOCO', 'COMPLETADA');
+    await expect(borrarSesion(repo, 'otro', '1')).rejects.toThrow('no existe');
+    await borrarSesion(repo, OWNER, '1');
+    expect(await repo.obtenerSesion(OWNER, '1')).toBeNull();
+  });
+
+  it('crea un bloque manual ya completado con origen PANEL', async () => {
+    const repo = new InMemorySessionRepository();
+    const s = await crearSesionManual(repo, OWNER, ahora, { tipo: 'FOCO', tarea: 'leer', inicio: new Date('2026-01-07T15:00:00Z'), minutos: '25' });
+    expect(s).toMatchObject({ estado: 'COMPLETADA', origen: 'PANEL', tarea: 'leer' });
+    expect(s.fin!.getTime() - s.inicio.getTime()).toBe(min(25));
+    const p = await cargarPanel(repo, OWNER, ahora);
+    expect(p.hoy.completados).toBe(1);
+  });
+
+  it('valida el bloque manual', async () => {
+    const repo = new InMemorySessionRepository();
+    const base = { tipo: 'FOCO', inicio: new Date('2026-01-07T15:00:00Z'), minutos: 25 };
+    await expect(crearSesionManual(repo, OWNER, ahora, { ...base, tipo: 'X' })).rejects.toThrow('Tipo');
+    await expect(crearSesionManual(repo, OWNER, ahora, { ...base, minutos: 999 })).rejects.toThrow('entre 1');
+    await expect(crearSesionManual(repo, OWNER, ahora, { ...base, minutos: 2.5 })).rejects.toThrow('entre 1');
+    await expect(crearSesionManual(repo, OWNER, ahora, { ...base, inicio: new Date('2026-01-07T19:50:00Z') })).rejects.toThrow('futuro');
+    await expect(crearSesionManual(repo, OWNER, ahora, { ...base, inicio: new Date('nope') })).rejects.toThrow('Hora');
   });
 });

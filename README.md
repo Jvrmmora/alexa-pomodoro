@@ -85,6 +85,7 @@ src/
     ├── tiempo.ts             # "hoy" y "semana" en Bogotá
     ├── ciclo.ts              # reglas de ciclo y reconciliación
     ├── mongo.ts              # cliente cacheado
+    ├── edicion.ts            # edición del historial desde el panel
     ├── panel.ts              # datos del panel (hoy + semana)
     ├── sesionPanel.ts        # cookie de sesión firmada (HMAC)
     ├── alexa/                # verificación de firma, Timers API, servicio y handlers
@@ -95,6 +96,14 @@ src/
 skill-package/                # manifiesto y modelo de interacción es-MX
 tests/                        # Vitest
 ```
+
+## Edición desde el panel
+
+Sobre el historial se puede cambiar la tarea de un foco, marcarlo como completado o interrumpido, eliminarlo y registrar un bloque que ya hiciste (`origen: PANEL`).
+
+- Un bloque **en curso** no se edita desde el panel: tiene un timer vivo en Alexa y su token solo llega con las requests de voz. Se cancela por voz.
+- Editar el historial **no recalcula** `focosEnCiclo`: ese contador es el estado vivo del ciclo de la voz, no una estadística.
+- Cada Server Action vuelve a comprobar la sesión, porque se puede invocar por POST directo.
 
 ## Desplegar el skill
 
@@ -111,7 +120,7 @@ cd alexa-pomodoro
 npm install
 cp .env.example .env.local   # completa MONGODB_URI, etc.
 npm run dev                  # panel en http://localhost:3000
-npm test                     # pruebas unitarias
+npm test                     # pruebas unitarias (también corren en CI)
 ```
 
 ### Variables de entorno
@@ -137,7 +146,7 @@ npm test                     # pruebas unitarias
   - [x] Endpoint `/api/alexa` y handlers
   - [x] Modelo de interacción `es-MX` y manifiesto del skill
 - [x] **Fase 2:** panel de lectura (login, "Hoy", historial, gráfica semanal, versión móvil, comandos de voz).
-- [ ] **Fase 3:** edición desde el panel, más pruebas, CI con GitHub Actions.
+- [x] **Fase 3:** edición desde el panel (tarea, estado, eliminar, registrar bloques), más pruebas y CI con GitHub Actions.
 - [ ] **Fase 4 (extras):** encadenado automático foco → descanso, duraciones configurables por voz, sincronización con Notion.
 
 ## Conceptos de Alexa (glosario rápido)
