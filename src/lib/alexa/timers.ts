@@ -29,7 +29,7 @@ export class AlexaTimerGateway implements TimerGateway {
     private readonly fetchFn: typeof fetch = fetch,
   ) {}
 
-  private get url() { return `${this.apiEndpoint}/v1/alexa/me/timers`; }
+  private get url() { return `${this.apiEndpoint}/v1/alerts/timers`; }
   private get headers() {
     return { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' };
   }

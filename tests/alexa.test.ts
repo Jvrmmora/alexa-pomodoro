@@ -149,7 +149,7 @@ describe('AlexaTimerGateway', () => {
     }) as unknown as typeof fetch;
     const id = await new AlexaTimerGateway('https://api', 'tok', fetchFalso).crear('FOCO', 'x');
     expect(id).toBe('abc');
-    expect(enviado!.url).toBe('https://api/v1/alexa/me/timers');
+    expect(enviado!.url).toBe('https://api/v1/alerts/timers');
     expect(JSON.parse(enviado!.init.body as string).duration).toBe('PT25M');
   });
 
