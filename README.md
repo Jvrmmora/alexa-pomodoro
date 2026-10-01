@@ -106,7 +106,7 @@ Copia `.env.example` a `.env.local` (ignorado por git) y complétalo. En Vercel 
 
 | Variable | Obligatoria | Descripción |
 |---|:-:|---|
-| `MONGODB_URI` | ✅ | Cadena de conexión de Atlas: `mongodb+srv://usuario:clave@cluster.mongodb.net/`. |
+| `MONGODB_URI` | ✅ | Cadena de conexión de Atlas: `mongodb+srv://<usuario>:<contraseña>@<tu-cluster>.mongodb.net/`. |
 | `MONGODB_DB` | | Nombre de la base. Por defecto `pomodoro`. |
 | `ALEXA_OWNER_ID` | ✅ | `userId` de Alexa del dueño del skill. Se descubre en los logs en la primera prueba ([ver cómo](#4-descubrir-tu-userid)). Para ver solo el panel sirve cualquier texto, p. ej. `demo-owner`. |
 | `PANEL_PASSWORD` | ✅ | Contraseña para entrar al panel web. |
@@ -130,7 +130,7 @@ cp .env.example .env.local
 Edita `.env.local` y usa una base **aparte** para la demo:
 
 ```bash
-MONGODB_URI=mongodb+srv://usuario:clave@cluster.mongodb.net/
+MONGODB_URI=mongodb+srv://<usuario>:<contraseña>@<tu-cluster>.mongodb.net/
 MONGODB_DB=pomodoro-demo
 ALEXA_OWNER_ID=demo-owner
 PANEL_PASSWORD=la-que-quieras
