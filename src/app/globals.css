@@ -1,28 +1,36 @@
 :root {
-  --fondo: #f6f5f3;
+  --fondo: #edf5fa;
+  --fondo-brillo: rgba(0, 202, 255, 0.18);
   --superficie: #ffffff;
-  --texto: #1c1b1a;
-  --suave: #6b6864;
-  --borde: #e4e1dc;
-  --acento: #d9432b;
-  --acento-suave: #fbe7e2;
-  --ok: #2f8f5b;
-  --pausa: #b9b4ad;
+  --borde: #d5e3ee;
+  --texto: #0b2033;
+  --suave: #547089;
+  --acento: #007ba3;
+  --acento-suave: rgba(0, 150, 200, 0.1);
+  --cian: #00caff;
+  --azul: #1f6fef;
+  --gradiente: linear-gradient(135deg, #0a8fc2, #1f6fef);
+  --texto-boton: #ffffff;
+  --pausa: #9db3c6;
   --error: #c0301a;
+  --sombra: 0 1px 2px rgba(11, 32, 51, 0.05), 0 8px 24px rgba(11, 32, 51, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fondo: #121110;
-    --superficie: #1c1a19;
-    --texto: #f1efec;
-    --suave: #a29d96;
-    --borde: #2e2b29;
-    --acento: #ef6a52;
-    --acento-suave: #3a1f1a;
-    --ok: #4cbf84;
-    --pausa: #5b5650;
-    --error: #ff8a75;
+    --fondo: #08111f;
+    --fondo-brillo: rgba(0, 202, 255, 0.16);
+    --superficie: rgba(255, 255, 255, 0.045);
+    --borde: rgba(255, 255, 255, 0.09);
+    --texto: #eaf4fb;
+    --suave: #8ea4b8;
+    --acento: #00caff;
+    --acento-suave: rgba(0, 202, 255, 0.12);
+    --gradiente: linear-gradient(135deg, #00caff, #3d8bff);
+    --texto-boton: #04121f;
+    --pausa: #4d6176;
+    --error: #ff8a8a;
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.25);
     color-scheme: dark;
   }
 }
@@ -36,9 +44,19 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--texto);
-  background: var(--fondo);
+  background:
+    radial-gradient(900px 420px at 50% -120px, var(--fondo-brillo), transparent 70%),
+    var(--fondo);
+  background-repeat: no-repeat;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 button { font: inherit; }
+a { color: inherit; text-decoration: none; }
+
+:focus-visible { outline: 2px solid var(--cian); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

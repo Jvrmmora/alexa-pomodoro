@@ -7,8 +7,8 @@ export function GraficaSemanal({ dias }: { dias: DiaSemana[] }) {
   return (
     <div>
       <div className={estilos.grafica} role="img" aria-label={`Pomodoros de la semana. ${resumen}`}>
-        {dias.map((d) => (
-          <div key={d.etiqueta} className={`${estilos.columna} ${d.esHoy ? estilos.hoy : ''}`}>
+        {dias.map((d, i) => (
+          <div key={d.etiqueta} className={`${estilos.columna} ${d.esHoy ? estilos.hoy : ''}`} style={{ '--i': i } as React.CSSProperties}>
             <span className={estilos.total}>{d.completados + d.interrumpidos || ''}</span>
             <div className={estilos.pila}>
               <span className={estilos.interrumpido} style={{ height: `${(d.interrumpidos / max) * 100}%` }} />

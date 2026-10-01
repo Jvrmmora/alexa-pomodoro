@@ -1,0 +1,15 @@
+.pie {
+  width: 100%; max-width: 760px; margin: 24px auto 0; padding: 28px 16px 36px;
+  display: grid; justify-items: center; gap: 10px; text-align: center;
+  border-top: 1px solid var(--borde); color: var(--suave); font-size: 0.85rem;
+}
+.marca { display: flex; align-items: center; gap: 8px; color: var(--texto); }
+.tecnologias { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tecnologias li {
+  padding: 4px 10px; border-radius: 99px; font-size: 0.75rem;
+  background: var(--acento-suave); color: var(--acento); border: 1px solid var(--borde);
+}
+.legal { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 16px; }
+.legal a { display: inline-flex; align-items: center; gap: 6px; color: var(--texto); }
+.legal a:hover { color: var(--acento); }
+.aviso { max-width: 520px; font-size: 0.72rem; opacity: 0.8; line-height: 1.5; }

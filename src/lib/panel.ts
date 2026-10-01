@@ -11,6 +11,7 @@ export interface SesionVista {
   inicio: string;
   finEsperado: string;
   minutos: number;
+  siguiente?: { tipo: TipoSesion; minutos: number };
 }
 
 export interface DiaSemana {
@@ -39,6 +40,7 @@ const aVista = (s: Sesion): SesionVista => ({
   inicio: s.inicio.toISOString(),
   finEsperado: s.finEsperado.toISOString(),
   // Duración real si ya terminó; la planeada mientras está activa.
+  siguiente: s.siguiente ? { tipo: s.siguiente.tipo, minutos: s.siguiente.minutos } : undefined,
   minutos: Math.max(0, Math.round(((s.fin ?? s.finEsperado).getTime() - s.inicio.getTime()) / 60_000)),
 });
 
