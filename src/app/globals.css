@@ -8,6 +8,7 @@
   --acento: #007ba3;
   --acento-suave: rgba(0, 150, 200, 0.1);
   --cian: #00caff;
+  --hoy: #e08a00;
   --azul: #1f6fef;
   --gradiente: linear-gradient(135deg, #0a8fc2, #1f6fef);
   --texto-boton: #ffffff;
@@ -25,6 +26,7 @@
     --texto: #eaf4fb;
     --suave: #8ea4b8;
     --acento: #00caff;
+    --hoy: #ffb02e;
     --acento-suave: rgba(0, 202, 255, 0.12);
     --gradiente: linear-gradient(135deg, #00caff, #3d8bff);
     --texto-boton: #04121f;

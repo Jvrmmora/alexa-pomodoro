@@ -17,29 +17,71 @@ async function sesion(repo: InMemorySessionRepository, inicio: Date, tipo: 'FOCO
 }
 
 describe('cargarPanel', () => {
-  it('cuenta hoy y reparte la semana por día (lunes a domingo, hora de Bogotá)', async () => {
+  it('cuenta hoy y reparte la semana por día (domingo a sábado, hora de Bogotá)', async () => {
     const repo = new InMemorySessionRepository();
     await sesion(repo, new Date('2026-01-05T14:00:00Z'), 'FOCO', 'COMPLETADA'); // lunes
     await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'FOCO', 'COMPLETADA'); // hoy
     await sesion(repo, new Date('2026-01-07T13:30:00Z'), 'DESCANSO_CORTO', 'COMPLETADA', 5);
     await sesion(repo, new Date('2026-01-07T14:00:00Z'), 'FOCO', 'INTERRUMPIDA', 10); // hoy
-    await sesion(repo, new Date('2026-01-04T14:00:00Z'), 'FOCO', 'COMPLETADA'); // semana anterior
+    await sesion(repo, new Date('2026-01-03T14:00:00Z'), 'FOCO', 'COMPLETADA'); // sábado de la semana anterior
+    await sesion(repo, new Date('2026-01-04T14:00:00Z'), 'FOCO', 'COMPLETADA'); // domingo: abre la semana
 
     const p = await cargarPanel(repo, OWNER, AHORA);
 
     expect(p.hoy).toMatchObject({ completados: 1, interrumpidos: 1, minutosEnfocados: 25 });
     expect(p.hoy.sesiones).toHaveLength(3);
     expect(p.semana).toHaveLength(7);
-    expect(p.semana[0]).toMatchObject({ etiqueta: 'lun', completados: 1, esHoy: false });
-    expect(p.semana[2]).toMatchObject({ etiqueta: 'mié', completados: 1, interrumpidos: 1, esHoy: true });
-    expect(p.semana.reduce((t, d) => t + d.completados, 0)).toBe(2);
+    expect(p.semana[0]).toMatchObject({ etiqueta: 'dom', clave: '2026-01-04', completados: 1, esHoy: false });
+    expect(p.semana[1]).toMatchObject({ etiqueta: 'lun', completados: 1 });
+    expect(p.semana[3]).toMatchObject({ etiqueta: 'mié', completados: 1, interrumpidos: 1, esHoy: true, seleccionado: true });
+    expect(p.semana[6].etiqueta).toBe('sáb');
+    expect(p.semana.reduce((t, d) => t + d.completados, 0)).toBe(3);
+  });
+
+  it('el día elegido trae su historial y la semana y el mes lo siguen', async () => {
+    const repo = new InMemorySessionRepository();
+    await sesion(repo, new Date('2025-12-31T14:00:00Z'), 'FOCO', 'COMPLETADA'); // mié 31 dic 2025
+    await sesion(repo, new Date('2025-12-31T15:00:00Z'), 'DESCANSO_CORTO', 'COMPLETADA', 5);
+    await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'FOCO', 'COMPLETADA'); // hoy
+
+    const p = await cargarPanel(repo, OWNER, AHORA, { dia: '2025-12-31' });
+
+    expect(p.dia).toMatchObject({ clave: '2025-12-31', esHoy: false, completados: 1 });
+    expect(p.dia.sesiones).toHaveLength(2);
+    expect(p.hoy.completados).toBe(1); // las tarjetas de hoy no cambian
+    expect(p.semana[0].clave).toBe('2025-12-28');
+    expect(p.semana.find((d) => d.seleccionado)?.clave).toBe('2025-12-31');
+    expect(p.mes).toMatchObject({ clave: '2025-12', anio: 2025, huecosInicio: 1 }); // 1 dic 2025 fue lunes
+    expect(p.mes.dias).toHaveLength(31);
+    expect(p.mes.dias[30]).toMatchObject({ clave: '2025-12-31', completados: 1, seleccionado: true });
+  });
+
+  it('el filtro de mes resume el año y no pisa el día elegido', async () => {
+    const repo = new InMemorySessionRepository();
+    await sesion(repo, new Date('2026-03-10T14:00:00Z'), 'FOCO', 'COMPLETADA');
+    await sesion(repo, new Date('2026-03-11T14:00:00Z'), 'FOCO', 'INTERRUMPIDA');
+    await sesion(repo, new Date('2026-01-07T13:00:00Z'), 'FOCO', 'COMPLETADA');
+
+    const p = await cargarPanel(repo, OWNER, AHORA, { mes: '2026-03' });
+
+    expect(p.dia.clave).toBe('2026-01-07');
+    expect(p.mes.clave).toBe('2026-03');
+    expect(p.meses).toHaveLength(12);
+    expect(p.meses[2]).toMatchObject({ clave: '2026-03', seleccionado: true, completados: 1, interrumpidos: 1 });
+    expect(p.meses[0]).toMatchObject({ completados: 1 });
+  });
+
+  it('ignora filtros inválidos y usa hoy', async () => {
+    const p = await cargarPanel(new InMemorySessionRepository(), OWNER, AHORA, { dia: '2026-02-31', mes: '2026-13' });
+    expect(p.dia.clave).toBe('2026-01-07');
+    expect(p.mes.clave).toBe('2026-01');
   });
 
   it('un foco que cruza la medianoche cuenta por su fecha de inicio', async () => {
     const repo = new InMemorySessionRepository();
     await sesion(repo, new Date('2026-01-07T04:50:00Z'), 'FOCO', 'COMPLETADA'); // 23:50 del martes en Bogotá
     const p = await cargarPanel(repo, OWNER, AHORA);
-    expect(p.semana[1].completados).toBe(1);
+    expect(p.semana[2].completados).toBe(1);
     expect(p.hoy.completados).toBe(0);
   });
 

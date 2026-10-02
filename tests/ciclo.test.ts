@@ -59,9 +59,9 @@ describe('tiempo en Bogotá (UTC-5)', () => {
     expect(hasta.toISOString()).toBe('2026-01-06T05:00:00.000Z');
   });
 
-  it('la semana empieza el lunes', () => {
+  it('la semana empieza el domingo', () => {
     const { desde, hasta } = rangoSemana(new Date('2026-01-07T18:00:00Z')); // miércoles
-    expect(desde.toISOString()).toBe('2026-01-05T05:00:00.000Z'); // lunes
-    expect(hasta.toISOString()).toBe('2026-01-12T05:00:00.000Z');
+    expect(desde.toISOString()).toBe('2026-01-04T05:00:00.000Z'); // domingo
+    expect(hasta.toISOString()).toBe('2026-01-11T05:00:00.000Z');
   });
 });

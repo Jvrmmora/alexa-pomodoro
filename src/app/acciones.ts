@@ -31,16 +31,22 @@ export async function cerrarSesion() {
 }
 
 // Cada acción de edición revalida la sesión: los Server Actions se pueden invocar por POST directo.
-async function conPermiso(tarea: (ctx: { repo: Awaited<ReturnType<typeof obtenerRepositorio>>; ownerId: string }) => Promise<void>) {
+// `volver` viene del cliente: solo se acepta una ruta interna del panel (`/` o `/?dia=…&mes=…`).
+const rutaSegura = (v: FormDataEntryValue | null) => (typeof v === 'string' && /^\/(\?[\w=&%-]*)?$/.test(v) ? v : '/');
+
+async function conPermiso(
+  tarea: (ctx: { repo: Awaited<ReturnType<typeof obtenerRepositorio>>; ownerId: string }) => Promise<void>,
+  volver = '/',
+) {
   if (!(await haySesion())) redirect('/login');
   const ownerId = process.env.ALEXA_OWNER_ID;
   if (!ownerId) throw new Error('Falta ALEXA_OWNER_ID');
-  let destino = '/';
+  let destino = volver;
   try {
     await tarea({ repo: await obtenerRepositorio(), ownerId });
   } catch (e) {
     if (!(e instanceof ErrorEdicion)) throw e;
-    destino = `/?error=${encodeURIComponent(e.message)}`;
+    destino = `${volver}${volver.includes('?') ? '&' : '?'}error=${encodeURIComponent(e.message)}`;
   }
   redirect(destino);
 }
@@ -50,11 +56,11 @@ export async function editarBloque(datos: FormData) {
     editarSesion(repo, ownerId, String(datos.get('id')), {
       ...(datos.has('tarea') ? { tarea: datos.get('tarea') } : {}),
       estado: datos.get('estado'),
-    }));
+    }), rutaSegura(datos.get('volver')));
 }
 
 export async function eliminarBloque(datos: FormData) {
-  await conPermiso(({ repo, ownerId }) => borrarSesion(repo, ownerId, String(datos.get('id'))));
+  await conPermiso(({ repo, ownerId }) => borrarSesion(repo, ownerId, String(datos.get('id'))), rutaSegura(datos.get('volver')));
 }
 
 export async function registrarBloque(datos: FormData) {

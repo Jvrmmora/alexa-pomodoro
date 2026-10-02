@@ -1,11 +1,15 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { CalendarioMes } from '@/components/CalendarioMes';
 import { AutoRefresco } from '@/components/AutoRefresco';
 import { Cuenta } from '@/components/Cuenta';
 import { GraficaSemanal } from '@/components/GraficaSemanal';
 import { GuiaRutina } from '@/components/GuiaRutina';
 import { Icono, type NombreIcono } from '@/components/Icono';
+import { Pestanas } from '@/components/Pestanas';
 import { LogoAlexa } from '@/components/LogoAlexa';
 import { haySesion } from '@/lib/autenticacion';
+import { enlacePanel } from '@/lib/enlaces';
 import { cargarPanel, type SesionVista } from '@/lib/panel';
 import { obtenerRepositorio } from '@/lib/repositorio';
 import { ZONA_HORARIA, type EstadoSesion, type TipoSesion } from '@/lib/tipos';
@@ -31,7 +35,7 @@ function formatoMinutos(m: number) {
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties;
 
-function Fila({ s }: { s: SesionVista }) {
+function Fila({ s, volver }: { s: SesionVista; volver: string }) {
   return (
     <li className={estilos.fila}>
       <span className={`${estilos.icoTipo} ${estilos[s.tipo]}`}><Icono nombre={ICONO_TIPO[s.tipo]} tamano={18} /></span>
@@ -46,6 +50,7 @@ function Fila({ s }: { s: SesionVista }) {
           <summary>Editar</summary>
           <form action={editarBloque} className={estilos.formulario}>
             <input type="hidden" name="id" value={s.id} />
+            <input type="hidden" name="volver" value={volver} />
             {s.tipo === 'FOCO' && (
               <label>Tarea<input name="tarea" defaultValue={s.tarea ?? ''} maxLength={80} /></label>
             )}
@@ -69,11 +74,15 @@ function Fila({ s }: { s: SesionVista }) {
 export default async function Panel({ searchParams }: PageProps<'/'>) {
   if (!(await haySesion())) redirect('/login');
 
-  const { error } = await searchParams;
+  const { error, dia: diaParam, mes: mesParam } = await searchParams;
   const ownerId = process.env.ALEXA_OWNER_ID;
   if (!ownerId) throw new Error('Falta ALEXA_OWNER_ID');
-  const datos = await cargarPanel(await obtenerRepositorio(), ownerId, new Date());
-  const { activa, hoy, config } = datos;
+  const datos = await cargarPanel(await obtenerRepositorio(), ownerId, new Date(), {
+    dia: typeof diaParam === 'string' ? diaParam : undefined,
+    mes: typeof mesParam === 'string' ? mesParam : undefined,
+  });
+  const { activa, hoy, dia, config } = datos;
+  const volver = enlacePanel({ dia: dia.esHoy ? undefined : dia.clave, mes: datos.mes.clave });
 
   return (
     <main className={estilos.pagina}>
@@ -144,18 +153,29 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
       </section>
 
       <section className={`${estilos.tarjeta} ${estilos.aparece}`} style={retraso(4)}>
-        <h2><Icono nombre="grafica" tamano={18} /> Esta semana</h2>
-        <GraficaSemanal dias={datos.semana} />
+        <Pestanas
+          inicial={typeof mesParam === 'string' ? 'mes' : 'semana'}
+          etiquetas={{
+            semana: <><Icono nombre="grafica" tamano={17} /> Esta semana</>,
+            mes: <><Icono nombre="calendario" tamano={17} /> Por mes</>,
+          }}
+          semana={<GraficaSemanal dias={datos.semana} mes={datos.mes.clave} />}
+          mes={<CalendarioMes mes={datos.mes} meses={datos.meses} dia={dia} />}
+        />
       </section>
 
-      <section className={`${estilos.tarjeta} ${estilos.aparece}`} style={retraso(5)}>
-        <h2><Icono nombre="historial" tamano={18} /> Historial de hoy</h2>
-        {hoy.sesiones.length === 0 ? (
-          <p className={estilos.vacio}>Todavía no hay bloques hoy.</p>
+      <section id="historial" className={`${estilos.tarjeta} ${estilos.aparece}`} style={retraso(5)}>
+        <h2><Icono nombre="historial" tamano={18} /> {dia.esHoy ? 'Historial de hoy' : 'Historial'}</h2>
+        <p className={estilos.subtitulo}>
+          {dia.titulo} · {dia.completados} completados · {dia.interrumpidos} interrumpidos · {formatoMinutos(dia.minutosEnfocados)} enfocado
+          {!dia.esHoy && <> · <Link href={enlacePanel({})}>Volver a hoy</Link></>}
+        </p>
+        {dia.sesiones.length === 0 ? (
+          <p className={estilos.vacio}>{dia.esHoy ? 'Todavía no hay bloques hoy.' : 'No hay bloques este día.'}</p>
         ) : (
-          <ul className={estilos.lista}>{hoy.sesiones.map((s) => <Fila key={s.id} s={s} />)}</ul>
+          <ul className={estilos.lista}>{dia.sesiones.map((s) => <Fila key={s.id} s={s} volver={volver} />)}</ul>
         )}
-        <details className={`${estilos.editar} ${estilos.registrar}`}>
+        {dia.esHoy && <details className={`${estilos.editar} ${estilos.registrar}`}>
           <summary><Icono nombre="mas" tamano={15} /> Registrar un bloque que ya hiciste</summary>
           <form action={registrarBloque} className={estilos.formulario}>
             <label>Tipo
@@ -170,7 +190,7 @@ export default async function Panel({ searchParams }: PageProps<'/'>) {
             <label>Duración (min)<input name="minutos" type="number" min={1} max={180} defaultValue={25} required /></label>
             <div className={estilos.botones}><button type="submit">Registrar</button></div>
           </form>
-        </details>
+        </details>}
       </section>
 
       <GuiaRutina encadenar={config.encadenar} />

@@ -54,6 +54,26 @@
   0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 202, 255, 0.35)); }
   50% { filter: drop-shadow(0 0 13px rgba(0, 202, 255, 0.75)); }
 }
+
+/* Último minuto: el anillo se tiñe de rojo con un aura que late */
+.ultimoMinuto::before {
+  content: ''; position: absolute; inset: -14%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 70, 90, 0.34) 0%, rgba(255, 70, 90, 0.12) 45%, transparent 70%);
+  animation: aura 1.2s ease-in-out infinite;
+}
+.ultimoMinuto .avance {
+  stroke: url(#anillo-grad-rojo); animation: resplandorRojo 1.2s ease-in-out infinite;
+}
+.ultimoMinuto .reloj { color: #ff6b6b; text-shadow: 0 0 18px rgba(255, 70, 90, 0.55); }
+.ultimoMinuto .centro > span { color: #ff9aa5; }
+@keyframes aura { 0%, 100% { opacity: 0.55; transform: scale(0.97); } 50% { opacity: 1; transform: scale(1.04); } }
+@keyframes resplandorRojo {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 70, 90, 0.5)); }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 70, 90, 0.95)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ultimoMinuto::before, .ultimoMinuto .avance { animation: none; }
+}
 .centro { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; }
 .centro > span { color: var(--suave); font-size: 0.8rem; margin-top: -2px; }
 .reloj {
@@ -103,16 +123,68 @@
   transform-origin: bottom; animation: crecer 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(0.3s + var(--i, 0) * 60ms);
 }
 @keyframes crecer { from { transform: scaleY(0.05); opacity: 0; } to { transform: none; opacity: 1; } }
+a.columna { color: inherit; text-decoration: none; cursor: pointer; border-radius: 12px; transition: transform 0.15s; }
+a.columna:hover { transform: translateY(-2px); }
+a.columna:hover .pila { box-shadow: 0 0 0 1.5px var(--cian); }
+a.columna:focus-visible, .chipMes:focus-visible, .celda:focus-visible, .navegarSemana a:focus-visible { outline: 2px solid var(--cian); outline-offset: 2px; }
+.elegido .dia { color: var(--acento); font-weight: 700; }
+.elegido .pila { box-shadow: 0 0 0 2px var(--cian), 0 0 14px color-mix(in srgb, var(--cian) 45%, transparent); }
+.navegarSemana { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 12px; font-size: 0.85rem; color: var(--suave); font-variant-numeric: tabular-nums; }
+.navegarSemana a { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; border: 1px solid var(--borde); color: var(--suave); }
+.navegarSemana a:hover { color: var(--acento); border-color: var(--cian); }
 .dia { font-size: 0.75rem; color: var(--suave); text-transform: capitalize; }
-.hoy .dia { color: var(--acento); font-weight: 700; }
-.hoy .pila { box-shadow: 0 0 0 1.5px var(--cian); }
+.hoy .dia { color: var(--texto); font-weight: 700; }
+.hoy .dia::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 5px; border-radius: 50%; background: var(--hoy); vertical-align: middle; }
 .pila span { display: block; width: 100%; }
 .completado { background: linear-gradient(180deg, #00e5ff, #1f6fef); }
 .interrumpido { background: var(--pausa); }
 .leyenda { display: flex; gap: 16px; margin-top: 14px; font-size: 0.78rem; color: var(--suave); }
+.leyenda .marcaHoy { border-radius: 50%; background: var(--hoy); width: 7px; height: 7px; }
 .leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
 
+/* Pestañas */
+.pestanas { display: flex; gap: 6px; margin-bottom: 14px; }
+.pestanas button {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 12px; cursor: pointer;
+  font: inherit; font-size: 0.95rem; font-weight: 700; color: var(--suave); background: transparent; border: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.pestanas button:hover { color: var(--texto); }
+.pestanas button:focus-visible { outline: 2px solid var(--cian); outline-offset: 2px; }
+.pestanas button svg { color: var(--acento); }
+.pestanas .pestanaActiva { color: var(--texto); background: var(--acento-suave); border-color: var(--cian); }
+
+/* Filtro por mes y calendario */
+.meses { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.chipMes {
+  text-align: center; padding: 5px 0; border-radius: 8px; font-size: 0.76rem; text-transform: capitalize; text-decoration: none;
+  color: var(--suave); border: 1px solid var(--borde); transition: border-color 0.15s, color 0.15s;
+}
+.chipMes:hover { border-color: var(--cian); color: var(--texto); }
+.chipMes.conDatos { color: var(--texto); }
+.chipMes.elegido { background: var(--gradiente); color: var(--texto-boton); border-color: transparent; font-weight: 700; }
+.tituloMes { margin: 12px 0 6px; font-size: 0.9rem; text-align: center; }
+.tituloMes::first-letter { text-transform: uppercase; }
+.calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 420px; margin: 0 auto; }
+.cabeceraDia { text-align: center; font-size: 0.7rem; color: var(--suave); }
+.celda {
+  position: relative; height: 38px; display: grid; place-items: center; border-radius: 8px; text-decoration: none;
+  font-size: 0.78rem; color: var(--suave); border: 1px solid transparent;
+  background: color-mix(in srgb, var(--borde) 40%, transparent); transition: transform 0.15s, border-color 0.15s;
+}
+.celda[data-con-datos] {
+  color: var(--texto);
+  background: color-mix(in srgb, var(--cian) calc(var(--nivel, 0.2) * 55%), color-mix(in srgb, var(--borde) 40%, transparent));
+}
+.celda small { position: absolute; bottom: 1px; right: 4px; font-size: 0.58rem; color: var(--suave); }
+.celda:hover { transform: translateY(-2px); border-color: var(--cian); }
+.celda.hoy::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--hoy); }
+.celda.elegido { background: var(--gradiente); color: var(--texto-boton); font-weight: 700; border-color: transparent; }
+.celda.elegido small { color: var(--texto-boton); opacity: 0.8; }
+
 /* Historial */
+.subtitulo { color: var(--suave); font-size: 0.83rem; margin: 2px 0 14px; text-transform: capitalize; }
+.subtitulo a { color: var(--acento); text-transform: none; }
 .lista { list-style: none; display: grid; }
 .fila {
   display: grid; grid-template-columns: 38px 1fr auto auto; align-items: center; gap: 4px 12px;

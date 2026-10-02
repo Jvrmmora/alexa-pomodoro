@@ -252,7 +252,7 @@ Las duraciones por voz aplican desde el siguiente bloque. Límites: foco 5–120
 
 - **Login** con una contraseña y cookie firmada (HMAC) de 30 días.
 - **Hoy:** anillo con cuenta regresiva en vivo, descanso programado, ciclo de 4 focos, completados, interrumpidos y minutos enfocados.
-- **Esta semana:** gráfica de lunes a domingo en hora de Bogotá.
+- **Esta semana:** gráfica de domingo a sábado en hora de Bogotá. Al hacer clic en un día se abre su historial (editable); las flechas cambian de semana y el bloque «Por mes» filtra por mes del año con un calendario.
 - **Historial** con edición: cambiar la tarea de un foco, marcarlo como completado o interrumpido, eliminarlo y registrar un bloque que ya hiciste (`origen: PANEL`).
 - **Tu rutina diaria:** guía en 4 momentos con la frase exacta de cada paso.
 - Se actualiza solo cada 30 s; diseño claro/oscuro según tu sistema y pensado primero para móvil.

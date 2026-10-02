@@ -30,13 +30,18 @@ export function Cuenta({ inicio, fin, ahora }: { inicio: string; fin: string; ah
   }, [restante, router]);
 
   const seg = Math.ceil(restante / 1000);
+  const ultimoMinuto = restante > 0 && restante <= 60_000;
   return (
-    <div className={estilos.anillo}>
+    <div className={`${estilos.anillo} ${ultimoMinuto ? estilos.ultimoMinuto : ''}`}>
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <defs>
           <linearGradient id="anillo-grad" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
             <stop stopColor="#00e5ff" />
             <stop offset="1" stopColor="#1f6fef" />
+          </linearGradient>
+          <linearGradient id="anillo-grad-rojo" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#ff5a5a" />
+            <stop offset="1" stopColor="#d61f4a" />
           </linearGradient>
         </defs>
         <circle className={estilos.pista} cx="100" cy="100" r={RADIO} />
